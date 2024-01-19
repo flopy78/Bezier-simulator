@@ -5,7 +5,7 @@ from numpy import arange
 pg.init()
 pg.font.init()
 
-font = pg.font.Font(None,size = 20)
+font = pg.font.Font(None,20)
 
 screen = pg.display.set_mode((400,400))
 pg.display.set_caption("Bézier curves")
@@ -15,6 +15,10 @@ done = False
 plotting = False
 
 new_points = []
+
+control_points = []
+
+splines = []
 
 clock = pg.time.Clock()
 
@@ -37,23 +41,33 @@ class Point:
     def __init__(self,x,y):
         self.x = x
         self.y = y
-
+    def __repr__(self):
+        return f"({self.x};{self.y})"
 class ControlPoint(Point):
-    def __init__(self,x,y):
+    def __init__(self,x,y,color = "red",radius = 5):
         super().__init__(x,y)
+        self.color = color
         self.drag = False
+        self.rect = pg.Rect(x-radius,y-radius,2*radius,2*radius)
+        self.radius = radius
+    def is_pressed(self):
+        return self.rect.collidepoint(pg.mouse.get_pos())
+    def draw(self):
+        pg.draw.circle(screen,self.color,(self.x,self.y),self.radius)
     
 class Spline:
-    def __init__(self,controls,color = "red",step=0.01):
+    def __init__(self,controls,color = "red",step=0.1):
         self.step = step
         self.controls = controls
+        print(self.controls)
         self.color = color
     def get_point(self,t,points = None):
         assert 0<= t <= 1
         if points is None:
             points = self.controls
+        print(points)
         if len(points) == 1:
-            return points.x
+            return points[0]
         else:
             new_points = []
 
@@ -62,10 +76,11 @@ class Spline:
                 B = points[i+1]
                 dx = B.x-A.x
                 dy = B.y-A.y
+                print("dy",dy)
                 C = Point(A.x+t*dx,A.x+t*dy)
                 new_points.append(C)
             return self.get_point(t,new_points)
-    def plot(self):
+    def draw(self):
         t_list = arange(0,1+self.step,self.step)
 
         points = []
@@ -74,6 +89,7 @@ class Spline:
 
         for point in points:
             pg.draw.rect(screen,self.color,pg.Rect(point.x,point.y,1,1))
+        exit()
 
         
 #INSTANCIATION
@@ -83,16 +99,34 @@ button = Button(0,0,"Nouvelle courbe")
 #MAIN LOOP
 while not done:
     for event in pg.event.get():
-        match event.type:
-            case pg.QUIT:
-                done = True
-                break
-            case pg.MOUSEBUTTONDOWN:
+        tp = event.type
+        if tp == pg.QUIT:
+            done = True
+            break
+        elif tp == pg.MOUSEBUTTONDOWN:
+            if  plotting:
+                for control in control_points:
+                    if control.is_pressed():
+                        new_points.append(control)
+                        break
+                else:
                     if button.is_pressed():
-                        plotting = True
+                        splines.append(Spline(new_points))
+                        plotting = False
+                    else:
+                        new_point = ControlPoint(*pg.mouse.get_pos())
+                        control_points.append(new_point)
+                        new_points.append(new_point)
+            else:
+                if button.is_pressed():
+                    plotting = True
+
     clock.tick(fps)
     screen.fill("white")
-
+    for spline in splines:
+        spline.draw()
+    for control in control_points:
+        control.draw()
     button.draw()
 
     pg.display.update()

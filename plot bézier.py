@@ -40,4 +40,4 @@ def plot_bezier(control,step):
 
     plt.show()
 
-plot_bezier([(1,2),(2,3),(4,6),(6,3)],0.01) # example
+plot_bezier([(1,1),(2,3),(3,4),(4 ,2)],0.01) # example
