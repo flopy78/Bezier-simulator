@@ -145,7 +145,6 @@ while not done:
                         for control in control_points:
                             control.select = False
         elif tp == pg.MOUSEBUTTONUP:
-                print("release")
                 for control in control_points:
                     control.drag = False
     
