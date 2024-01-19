@@ -34,19 +34,19 @@ class Button:
         self.textoff = font.render(txtoff, True, "black")
         self.texton = font.render(txton, True, "black")
         w, h = font.size(txtoff)
-        self.rectoff = pg.Rect(x, y, w+20, h+20)
+        self.rectoff = pg.Rect(x, y, w + 20, h + 20)
         w, h = font.size(txton)
-        self.recton = pg.Rect(x, y, w+20, h+20)
+        self.recton = pg.Rect(x, y, w + 20, h + 20)
         self.on = False
     def draw(self):
 
         if self.on:
             pg.draw.rect(screen, "red", self.recton, border_radius = 10)
-            screen.blit(self.texton, (self.recton.left + 10,  self.recton.top +10))
+            screen.blit(self.texton, (self.recton.left + 10,  self.recton.top + 10))
 
         else:
             pg.draw.rect(screen, "grey", self.rectoff, border_radius = 10)
-            screen.blit(self.textoff, (self.rectoff.left + 10,  self.rectoff.top +10))
+            screen.blit(self.textoff, (self.rectoff.left + 10,  self.rectoff.top + 10))
 
     def is_pressed(self):
         if self.on: return self.recton.collidepoint(pg.mouse.get_pos())
@@ -67,7 +67,7 @@ class ControlPoint(Point):
         self.color = color
         self.drag = False
         self.select = False
-        self.rect = pg.Rect(x-radius, y-radius, 2*radius, 2*radius)
+        self.rect = pg.Rect(x - radius, y - radius, 2 * radius, 2 * radius)
         self.radius = radius
     def is_pressed(self):
         return self.rect.collidepoint(pg.mouse.get_pos())
@@ -85,7 +85,7 @@ class ControlPoint(Point):
 
         del self
 class Spline:
-    def __init__(self, controls, color = "red", step=0.001):
+    def __init__(self, controls, color = "red", step = 0.001):
         self.step = step
         self.controls = controls
         self.color = color
@@ -93,7 +93,7 @@ class Spline:
         for control in self.controls:
             control.splines.append(self)
     def get_point(self, t, points = None):
-        assert 0<= t <= 1
+        assert 0 <= t <= 1
         if points is None:
             points = self.controls
         if len(points) == 1:
@@ -101,12 +101,12 @@ class Spline:
         else:
             new_points = []
 
-            for i in range(len(points)-1):
+            for i in range(len(points) - 1):
                 A = points[i]
-                B = points[i+1]
-                dx = B.x-A.x
-                dy = B.y-A.y
-                C = Point(A.x+t*dx, A.y+t*dy)
+                B = points[i + 1]
+                dx = B.x - A.x
+                dy = B.y - A.y
+                C = Point(A.x + t * dx, A.y + t * dy)
                 new_points.append(C)
             return self.get_point(t, new_points)
     def draw(self):
@@ -117,10 +117,10 @@ class Spline:
             return
         for i in range(len(self.controls)-1):
             A = self.controls[i]
-            B = self.controls[i+1]
-            for point in [self.get_point(t,[A,B]) for t in arange(0, 1+self.step, self.step)]:
+            B = self.controls[i + 1]
+            for point in [self.get_point(t, [A, B]) for t in arange(0, 1 + self.step, self.step)]:
                 pg.draw.rect(screen, "grey", pg.Rect(point.x, point.y, 1, 1))
-        points = [self.get_point(t) for t in arange(0, 1+self.step, self.step)]
+        points = [self.get_point(t) for t in arange(0, 1 + self.step, self.step)]
 
         for point in points:
             pg.draw.rect(screen, self.color, pg.Rect(point.x, point.y, 1, 1))
