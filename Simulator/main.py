@@ -12,7 +12,6 @@ screen = pg.display.set_mode((800,800))
 pg.display.set_caption("Bézier curves")
 
 colors = ["red","blue","green","purple","pink","orange","brown"]
-n_color = 0
 
 done = False
 
@@ -44,6 +43,7 @@ class Button:
         screen.blit(self.text,(self.rect.left + 10, self.rect.top +10))
     def is_pressed(self):
         return self.rect.collidepoint(pg.mouse.get_pos())
+
     
 class Point:
     def __init__(self,x,y):
@@ -54,6 +54,7 @@ class Point:
 class ControlPoint(Point):
     def __init__(self,x,y,color = "red",radius = 5):
         super().__init__(x,y)
+        self.splines = []
         self.color = color
         self.drag = False
         self.select = False
@@ -68,12 +69,20 @@ class ControlPoint(Point):
         w = 0
         if self.select: w = 1
         pg.draw.circle(screen,self.color,(self.x,self.y),self.radius,width=w)
-    
+    def remove(self):
+        for spline in self.splines:
+            spline.controls.remove(self)
+        control_points.remove(self)
+
+        del self
 class Spline:
     def __init__(self,controls,color = "red",step=0.001):
         self.step = step
         self.controls = controls
         self.color = color
+
+        for control in self.controls:
+            control.splines.append(self)
     def get_point(self,t,points = None):
         assert 0<= t <= 1
         if points is None:
@@ -92,6 +101,11 @@ class Spline:
                 new_points.append(C)
             return self.get_point(t,new_points)
     def draw(self):
+        if len(self.controls) == 0:
+            splines.remove(self)
+            colors.insert(0,self.color)
+            del self
+            return
         t_list = arange(0,1+self.step,self.step)
 
         points = []
@@ -121,12 +135,12 @@ while not done:
                         break
                 else:
                     if button.is_pressed():
-                        splines.append(Spline(new_points,colors[n_color]))
+                        splines.append(Spline(new_points,colors[0]))
                         plotting = False
+                        colors = colors[1:]
                         new_points = []
-                        n_color += 1
                     else:
-                        new_point = ControlPoint(*pg.mouse.get_pos(),colors[n_color])
+                        new_point = ControlPoint(*pg.mouse.get_pos(),colors[0])
                         control_points.append(new_point)
                         new_points.append(new_point)
             else:
@@ -147,6 +161,12 @@ while not done:
         elif tp == pg.MOUSEBUTTONUP:
                 for control in control_points:
                     control.drag = False
+        elif tp == pg.KEYDOWN:
+            if event.key == pg.K_BACKSPACE:
+                for control in control_points:
+                    if control.select:
+                        control.remove()
+                        break
     
                     
 
