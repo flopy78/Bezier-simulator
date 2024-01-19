@@ -1,5 +1,6 @@
 import pygame as pg
 from numpy import arange
+from copy import deepcopy
 
 #SETUP
 pg.init()
@@ -9,6 +10,9 @@ font = pg.font.Font(None,20)
 
 screen = pg.display.set_mode((400,400))
 pg.display.set_caption("Bézier curves")
+
+colors = ["red","blue","green","purple","pink","orange","black","brown"]
+n_color = 0
 
 done = False
 
@@ -32,7 +36,11 @@ class Button:
         w,h = font.size(txt)
         self.rect = pg.Rect(x,y,w+20,h+20)
     def draw(self):
-        pg.draw.rect(screen,"grey",self.rect,border_radius = 10)
+        global plotting
+        if plotting:
+            pg.draw.rect(screen,"red",self.rect,border_radius = 10)
+        else:
+            pg.draw.rect(screen,"grey",self.rect,border_radius = 10)
         screen.blit(self.text,(self.rect.left + 10, self.rect.top +10))
     def is_pressed(self):
         return self.rect.collidepoint(pg.mouse.get_pos())
@@ -53,19 +61,19 @@ class ControlPoint(Point):
     def is_pressed(self):
         return self.rect.collidepoint(pg.mouse.get_pos())
     def draw(self):
+        if self.drag:
+            self.x,self.y = pg.mouse.get_pos()
         pg.draw.circle(screen,self.color,(self.x,self.y),self.radius)
     
 class Spline:
-    def __init__(self,controls,color = "red",step=0.1):
+    def __init__(self,controls,color = "red",step=0.001):
         self.step = step
         self.controls = controls
-        print(self.controls)
         self.color = color
     def get_point(self,t,points = None):
         assert 0<= t <= 1
         if points is None:
             points = self.controls
-        print(points)
         if len(points) == 1:
             return points[0]
         else:
@@ -76,8 +84,7 @@ class Spline:
                 B = points[i+1]
                 dx = B.x-A.x
                 dy = B.y-A.y
-                print("dy",dy)
-                C = Point(A.x+t*dx,A.x+t*dy)
+                C = Point(A.x+t*dx,A.y+t*dy)
                 new_points.append(C)
             return self.get_point(t,new_points)
     def draw(self):
@@ -89,7 +96,6 @@ class Spline:
 
         for point in points:
             pg.draw.rect(screen,self.color,pg.Rect(point.x,point.y,1,1))
-        exit()
 
         
 #INSTANCIATION
@@ -111,15 +117,27 @@ while not done:
                         break
                 else:
                     if button.is_pressed():
-                        splines.append(Spline(new_points))
+                        splines.append(Spline(new_points,colors[n_color]))
                         plotting = False
+                        new_points = []
+                        n_color += 1
                     else:
-                        new_point = ControlPoint(*pg.mouse.get_pos())
+                        new_point = ControlPoint(*pg.mouse.get_pos(),colors[n_color])
                         control_points.append(new_point)
                         new_points.append(new_point)
             else:
                 if button.is_pressed():
                     plotting = True
+                else:
+                    for control in control_points:
+                        if control.is_pressed():
+                            control.drag = True
+                            break
+        elif tp == pg.MOUSEBUTTONUP:
+                for control in control_points:
+                    control.drag = False
+    
+                    
 
     clock.tick(fps)
     screen.fill("white")
