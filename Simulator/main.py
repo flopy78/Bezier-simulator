@@ -8,10 +8,10 @@ pg.font.init()
 
 font = pg.font.Font(None,20)
 
-screen = pg.display.set_mode((400,400))
+screen = pg.display.set_mode((800,800))
 pg.display.set_caption("Bézier curves")
 
-colors = ["red","blue","green","purple","pink","orange","black","brown"]
+colors = ["red","blue","green","purple","pink","orange","brown"]
 n_color = 0
 
 done = False
@@ -56,6 +56,7 @@ class ControlPoint(Point):
         super().__init__(x,y)
         self.color = color
         self.drag = False
+        self.select = False
         self.rect = pg.Rect(x-radius,y-radius,2*radius,2*radius)
         self.radius = radius
     def is_pressed(self):
@@ -63,7 +64,10 @@ class ControlPoint(Point):
     def draw(self):
         if self.drag:
             self.x,self.y = pg.mouse.get_pos()
-        pg.draw.circle(screen,self.color,(self.x,self.y),self.radius)
+            self.rect.center = (self.x,self.y)
+        w = 0
+        if self.select: w = 1
+        pg.draw.circle(screen,self.color,(self.x,self.y),self.radius,width=w)
     
 class Spline:
     def __init__(self,controls,color = "red",step=0.001):
@@ -132,8 +136,16 @@ while not done:
                     for control in control_points:
                         if control.is_pressed():
                             control.drag = True
+                            control.select = True
+                            for c in control_points:
+                                if c != control:
+                                    c.select = False
                             break
+                    else:
+                        for control in control_points:
+                            control.select = False
         elif tp == pg.MOUSEBUTTONUP:
+                print("release")
                 for control in control_points:
                     control.drag = False
     
