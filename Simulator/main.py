@@ -30,19 +30,28 @@ fps = 60
 #CLASS DEFINITIONS
 
 class Button:
-    def __init__(self,x,y,txt):
-        self.text = font.render(txt,True,"black")
-        w,h = font.size(txt)
-        self.rect = pg.Rect(x,y,w+20,h+20)
+    def __init__(self,x,y,txtoff,txton):
+        self.textoff = font.render(txtoff,True,"black")
+        self.texton = font.render(txton,True,"black")
+        w,h = font.size(txtoff)
+        self.rectoff = pg.Rect(x,y,w+20,h+20)
+        w,h = font.size(txton)
+        self.recton = pg.Rect(x,y,w+20,h+20)
+        self.on = False
     def draw(self):
-        global plotting
-        if plotting:
-            pg.draw.rect(screen,"red",self.rect,border_radius = 10)
+
+        if self.on:
+            pg.draw.rect(screen,"red",self.recton,border_radius = 10)
+            screen.blit(self.texton,(self.recton.left + 10, self.recton.top +10))
+
         else:
-            pg.draw.rect(screen,"grey",self.rect,border_radius = 10)
-        screen.blit(self.text,(self.rect.left + 10, self.rect.top +10))
+            pg.draw.rect(screen,"grey",self.rectoff,border_radius = 10)
+            screen.blit(self.textoff,(self.rectoff.left + 10, self.rectoff.top +10))
+
     def is_pressed(self):
-        return self.rect.collidepoint(pg.mouse.get_pos())
+        if self.on: return self.recton.collidepoint(pg.mouse.get_pos())
+        else: return self.rectoff.collidepoint(pg.mouse.get_pos())   
+
 
     
 class Point:
@@ -117,7 +126,7 @@ class Spline:
 
         
 #INSTANCIATION
-button = Button(0,0,"Nouvelle courbe")
+button = Button(0,0,"Nouvelle courbe","Valider le tracé")
 
 
 #MAIN LOOP
@@ -135,6 +144,7 @@ while not done:
                         break
                 else:
                     if button.is_pressed():
+                        button.on = False
                         splines.append(Spline(new_points,colors[0]))
                         plotting = False
                         colors = colors[1:]
@@ -146,6 +156,7 @@ while not done:
             else:
                 if button.is_pressed():
                     plotting = True
+                    button.on = True
                 else:
                     for control in control_points:
                         if control.is_pressed():
