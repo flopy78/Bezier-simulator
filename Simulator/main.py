@@ -9,7 +9,7 @@ pg.font.init()
 font = pg.font.Font(None,20)
 
 screen = pg.display.set_mode((800,800))
-pg.display.set_caption("Bézier curves")
+pg.display.set_caption("Courbes de Bézier")
 
 colors = ["red","blue","green","purple","pink","orange","brown"]
 
