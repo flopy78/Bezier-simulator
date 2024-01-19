@@ -115,7 +115,11 @@ class Spline:
             colors.insert(0, self.color)
             del self
             return
-        
+        for i in range(len(self.controls)-1):
+            A = self.controls[i]
+            B = self.controls[i+1]
+            for point in [self.get_point(t,[A,B]) for t in arange(0, 1+self.step, self.step)]:
+                pg.draw.rect(screen, "grey", pg.Rect(point.x, point.y, 1, 1))
         points = [self.get_point(t) for t in arange(0, 1+self.step, self.step)]
 
         for point in points:
