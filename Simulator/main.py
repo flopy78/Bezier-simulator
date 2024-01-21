@@ -17,11 +17,11 @@ done = False
 
 plotting = False
 
-new_points = []
+new_points: list['ControlPoint'] = []
 
-control_points = []
+control_points: list['ControlPoint'] = []
 
-splines = []
+splines: list['Spline'] = []
 
 clock = pg.time.Clock()
 
@@ -65,7 +65,7 @@ class Point:
 class ControlPoint(Point):
     def __init__(self, x, y, color = "red", radius = 5):
         super().__init__(x, y)
-        self.splines = []
+        self.splines: list[Spline] = []
         self.color = color
         self.drag = False
         self.select = False
@@ -91,7 +91,7 @@ class ControlPoint(Point):
         del self
 
 class Spline:
-    def __init__(self, controls, color = "red", step = 0.001):
+    def __init__(self, controls: list[ControlPoint], color = "red", step = 0.001):
         self.step = step
         self.controls = controls
         self.color = color
@@ -99,14 +99,14 @@ class Spline:
         for control in self.controls:
             control.splines.append(self)
             
-    def get_point(self, t, points = None):
+    def get_point(self, t, points: list[Point] = None):
         assert 0 <= t <= 1
         if points is None:
             points = self.controls
         if len(points) == 1:
             return points[0]
         else:
-            new_points = []
+            new_points: list[Point] = []
 
             for i in range(len(points) - 1):
                 A = points[i]
