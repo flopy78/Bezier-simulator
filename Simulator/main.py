@@ -2,7 +2,7 @@ import pygame as pg
 from numpy import arange
 from copy import deepcopy
 
-#SETUP
+# SETUP
 pg.init()
 pg.font.init()
 
@@ -27,7 +27,7 @@ clock = pg.time.Clock()
 
 fps = 60
 
-#CLASS DEFINITIONS
+# CLASS DEFINITIONS
 
 class Button:
     def __init__(self, x, y, txtoff, txton):
@@ -58,8 +58,10 @@ class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
     def __repr__(self):
         return f"({self.x};{self.y})"
+    
 class ControlPoint(Point):
     def __init__(self, x, y, color = "red", radius = 5):
         super().__init__(x, y)
@@ -69,8 +71,10 @@ class ControlPoint(Point):
         self.select = False
         self.rect = pg.Rect(x - radius, y - radius, 2 * radius, 2 * radius)
         self.radius = radius
+
     def is_pressed(self):
         return self.rect.collidepoint(pg.mouse.get_pos())
+    
     def draw(self):
         if self.drag:
             self.x, self.y = pg.mouse.get_pos()
@@ -78,12 +82,14 @@ class ControlPoint(Point):
         w = 0
         if self.select: w = 1
         pg.draw.circle(screen, self.color, (self.x, self.y), self.radius, width=w)
+
     def remove(self):
         for spline in self.splines:
             spline.controls.remove(self)
         control_points.remove(self)
 
         del self
+
 class Spline:
     def __init__(self, controls, color = "red", step = 0.001):
         self.step = step
@@ -92,6 +98,7 @@ class Spline:
 
         for control in self.controls:
             control.splines.append(self)
+            
     def get_point(self, t, points = None):
         assert 0 <= t <= 1
         if points is None:
@@ -109,6 +116,7 @@ class Spline:
                 C = Point(A.x + t * dx, A.y + t * dy)
                 new_points.append(C)
             return self.get_point(t, new_points)
+        
     def draw(self):
         if len(self.controls) == 0:
             splines.remove(self)
@@ -126,11 +134,11 @@ class Spline:
             pg.draw.rect(screen, self.color, pg.Rect(point.x, point.y, 1, 1))
 
         
-#INSTANCIATION
+# INSTANCIATION
 button = Button(0, 0, "Nouvelle courbe", "Valider le tracé")
 
 
-#MAIN LOOP
+# MAIN LOOP
 while not done:
     for event in pg.event.get():
         tp = event.type
