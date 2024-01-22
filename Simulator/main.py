@@ -1,6 +1,5 @@
 import pygame as pg
 from numpy import arange
-from copy import deepcopy
 
 # SETUP
 pg.init()
